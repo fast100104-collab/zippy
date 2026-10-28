@@ -86,6 +86,7 @@ button:focus-visible{outline:2px solid var(--zip);outline-offset:2px}
 var KEY="zippy_v2",W={level:1,fixed:0,rot:false};
 try{var sv=JSON.parse(localStorage.getItem(KEY));if(sv)W=sv}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(W))}catch(e){}}
+function saveS(){try{localStorage.setItem(KEY+"_s",JSON.stringify({disk:S.disk,log:S.log,web:S.web,db:S.db,wifi:S.wifi,inc:S.inc}))}catch(e){}}
 var S={disk:48,log:false,web:true,db:true,wifi:true,inc:null,tm:null};
 var N=[["me","📱","Sen",1],["wifi","📶","Wi-Fi",3],["disk","💾","Disk",1],["web","⚙️","Nginx",1],["db","🗄️","Maglumat",2],["site","🌐","Sahypa",1]];
 var INC={
@@ -105,7 +106,7 @@ function p(t,c){var d=document.createElement("div");if(c)d.className=c;d.textCon
 function say(t){why.textContent=t}
 function start(k){
  S.inc=k;INC[k].set();document.getElementById("mt").textContent="Waka: "+INC[k].t;document.getElementById("md").textContent=INC[k].d;
- document.getElementById("mis").style.display="";p("⚠ Täze waka: "+INC[k].t,"e");render();
+ document.getElementById("mis").style.display="";p("⚠ Täze waka: "+INC[k].t,"e");render();saveS();
 }
 function pick(){
  var u=["db","wifi"].filter(function(k){return k==="db"?W.level>=2:W.level>=3});
@@ -127,7 +128,7 @@ function solve(){
  if(S.inc==="wifi")h="<p>Ulgam ýok → hiç hyzmat elýeterli däl. Ilki ýol barlanýar, soňra hyzmat.</p>";
  if(up)h+="<p>Täze rayon açyldy: "+(W.level===2?"🗄️ Maglumat bazasy":"📶 Wi-Fi")+".</p>";
  document.getElementById("wb").innerHTML=h;j.classList.add("on");
- document.getElementById("mis").style.display="none";S.inc=null;save();
+ document.getElementById("mis").style.display="none";S.inc=null;save();saveS();
  var f=N.filter(function(n){return n[3]===W.level})[0];if(up&&f)f.fresh=1;render();if(f)f.fresh=0;
  j.scrollIntoView({behavior:"smooth",block:"nearest"});
  clearTimeout(S.tm);S.tm=setTimeout(function(){document.getElementById("win").classList.remove("on");var k=pick();if(k==="disk"&&W.rot){guard();S.tm=setTimeout(function(){start("db"===pickAlt()?"db":pickAlt())},9000)}else start(k)},9000);
@@ -154,7 +155,7 @@ function run(raw){
   else if(!S.db){p("HTTP 500: database connection refused","e");say("Nginx bar, ýöne maglumat bazasyna ýetip bilenok.")}
   else{p("HTTP 200 OK\nZIPPY WORLD hoş geldiňiz","g");say("Sahypa açyldy.");if(S.inc)solve()}}
  else{p(a[0]+": tanalmady. 'help' ýaz.","e");say("Hiç zat bozulmady.")}
- render();
+ render();saveS();
 }
 var C=["curl zippy.tm","df -h","ls /var/log","rm /var/log/big.log","systemctl status nginx","systemctl start nginx","systemctl start postgres","systemctl restart wifi","ping router","logrotate on"];
 document.getElementById("chips").innerHTML=C.map(function(c){return '<button class="chip" data-c="'+c+'">'+c+'</button>'}).join("");
@@ -163,7 +164,13 @@ document.getElementById("run").onclick=function(){run(inp.value);inp.value=""};
 inp.onkeydown=function(e){if(e.key==="Enter"){run(inp.value);inp.value=""}};
 var H=0;document.getElementById("hint").onclick=function(){var m={disk:["curl zippy.tm","df -h","ls /var/log","rm /var/log/big.log, soňra systemctl start nginx"],db:["curl zippy.tm","systemctl status postgres","systemctl start postgres"],wifi:["curl zippy.tm","ping router","systemctl restart wifi"]}[S.inc]||["Waka garaşylýar. Dünýä özi täze waka döredýär."];say("Maslahat: "+m[H%m.length]);H++};
 document.getElementById("rs").onclick=function(){try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
-p("Dünýä işe başlady.","g");render();start(pick());
+p("Dünýä işe başlady.","g");
+var ss=null;try{ss=JSON.parse(localStorage.getItem(KEY+"_s"))}catch(e){}
+if(ss&&ss.inc&&INC[ss.inc]){
+ S.disk=ss.disk;S.log=ss.log;S.web=ss.web;S.db=ss.db;S.wifi=ss.wifi;S.inc=ss.inc;
+ document.getElementById("mt").textContent="Waka: "+INC[S.inc].t;document.getElementById("md").textContent=INC[S.inc].d;
+ p("Dünýä ýatda saklanan ýagdaýdan dowam edýär.","g");render();
+}else{render();start(pick())}
 </script>
 </body>
 </html>
