@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="tk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZIPPY WORLD</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f0ff;--panel:#fff;--ink:#1d1840;--mute:#6a6490;--ok:#0f9e6e;--bad:#e0485a;--zip:#f2b200;--line:#d9d3f5;--term:#1d1840;--termink:#e9e4ff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17123a;--panel:#211a52;--ink:#f1ecff;--mute:#a49fd0;--ok:#4fe3ae;--bad:#ff6b7d;--zip:#ffcb2e;--line:#3a3178;--term:#0f0b2b;--termink:#e9e4ff}}
+:root[data-theme="dark"]{--bg:#17123a;--panel:#211a52;--ink:#f1ecff;--mute:#a49fd0;--ok:#4fe3ae;--bad:#ff6b7d;--zip:#ffcb2e;--line:#3a3178;--term:#0f0b2b;--termink:#e9e4ff}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.5 "Bricolage Grotesque",system-ui,sans-serif;max-width:560px;margin-inline:auto;padding:16px 16px 40px}
+h1{font-weight:800;font-size:28px;margin:4px 0 2px;letter-spacing:-.5px}
+h1 span{color:var(--zip)}
+.sub{color:var(--mute);margin:0 0 16px;font-size:15px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px}
+.mission b{font-weight:800}
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;align-items:start;text-align:center}
+.node{position:relative;padding:10px 2px 8px;border-radius:14px;border:2px solid var(--line);transition:border-color .4s,background .4s}
+.node i{display:block;font-style:normal;font-size:26px;line-height:1.1}
+.node em{display:block;font-style:normal;font-size:12px;color:var(--mute);margin-top:2px}
+.node strong{display:block;font-size:12px;font-family:"JetBrains Mono",monospace;font-weight:700;margin-top:4px}
+.node.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.node.ok strong{color:var(--ok)}
+.node.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.node.bad strong{color:var(--bad)}
+.node.me{border-color:var(--zip)}
+.why{margin:12px 0 0;font-size:15px;min-height:46px;border-left:4px solid var(--zip);padding-left:10px}
+.term{background:var(--term);color:var(--termink);border-radius:18px;padding:12px;font:400 14px/1.5 "JetBrains Mono",ui-monospace,monospace}
+.out{height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}
+.out .c{color:var(--zip)}.out .e{color:var(--bad)}.out .g{color:var(--ok)}
+.row{display:flex;gap:8px;margin-top:8px;align-items:center}
+.row span{color:var(--zip)}
+input{flex:1;min-width:0;background:transparent;border:0;border-bottom:1px solid var(--mute);color:inherit;font:inherit;padding:6px 0;outline:0}
+input:focus-visible{border-color:var(--zip)}
+button{font:inherit;cursor:pointer}
+.go{background:var(--zip);color:#1d1840;border:0;border-radius:10px;padding:6px 14px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{background:transparent;color:var(--termink);border:1px solid var(--mute);border-radius:99px;padding:5px 11px;font:400 13px "JetBrains Mono",monospace}
+.chip:hover,.go:hover{filter:brightness(1.15)}
+button:focus-visible{outline:2px solid var(--zip);outline-offset:2px}
+.hint{background:none;border:0;color:var(--mute);text-decoration:underline;padding:8px 0 0;font-size:14px}
+.win{display:none;border-color:var(--ok)}
+.win.on{display:block}
+.win h2{margin:0 0 4px;font-size:20px}
+.next{opacity:.6;font-size:14px;color:var(--mute);margin:8px 0 0}
+.stats{display:flex;gap:8px;margin:0 0 12px;flex-wrap:wrap}
+.stats span{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 11px;font-size:13px;color:var(--mute)}
+.stats b{color:var(--ink)}
+.map{grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+.node.lock{border-style:dashed;opacity:.55}
+.node.new{animation:pop .7s}
+@keyframes pop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.node.new{animation:none}}
+.alert{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--panel))}
+.reset{background:none;border:0;color:var(--mute);font-size:13px;text-decoration:underline;padding:8px 0}
+.win p{margin:6px 0}
+</style>
+</head>
+<body>
+<h1>ZIPPY <span>WORLD</span></h1>
+<p class="sub">Dünýäň ösýär. Sen düzetdigiňçe täze zatlar peýda bolýar.</p>
+<div class="stats"><span>Derejesi <b id="sl">1</b></span><span>Düzedilen <b id="sf">0</b></span><span>Awtomat gorag <b id="sr">ýok</b></span></div>
+
+<div class="card mission alert" id="mis"><b id="mt"></b><br><span id="md" style="color:var(--mute)"></span></div>
+
+<div class="card">
+<div class="map" id="map"></div>
+<p class="why" id="why">Dünýäniň ýagdaýy hakyky. Her buýruk ony üýtgedýär.</p>
+</div>
+
+<div class="term">
+<div class="out" id="out" aria-live="polite"></div>
+<form class="row" id="f" onsubmit="return false"><span>$</span><input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Buýruk"><button class="go" id="run">Işlet</button></form>
+<div class="chips" id="chips"></div>
+</div>
+<button class="hint" id="hint">Kömek gerekmi?</button>
+
+<div class="card win" id="win"><h2 id="wh"></h2><div id="wb"></div></div>
+<button class="reset" id="rs">Dünýäni täzeden başla</button>
+
+<script>
+var KEY="zippy_v2",W={level:1,fixed:0,rot:false};
+try{var sv=JSON.parse(localStorage.getItem(KEY));if(sv)W=sv}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(W))}catch(e){}}
+var S={disk:48,log:false,web:true,db:true,wifi:true,inc:null,tm:null};
+var N=[["me","📱","Sen",1],["wifi","📶","Wi-Fi",3],["disk","💾","Disk",1],["web","⚙️","Nginx",1],["db","🗄️","Maglumat",2],["site","🌐","Sahypa",1]];
+var INC={
+disk:{t:"Sahypa açylmaýar",d:"Dostuň sahypasy açylmaýar. Sebäbini tap.",set:function(){S.log=true;S.disk=100;S.web=false}},
+db:{t:"Sahypa ýarym işleýär",d:"Sahypa açylýar, ýöne maglumatlar ýüklenenok.",set:function(){S.db=false}},
+wifi:{t:"Telefon sahypa ýetip bilenok",d:"Biriken ýaly, ýöne hiç zat açylmaýar.",set:function(){S.wifi=false}}};
+var out=document.getElementById("out"),why=document.getElementById("why"),inp=document.getElementById("in");
+function siteOk(){return S.wifi&&S.web&&S.db&&S.disk<100}
+function render(){
+ var st={me:["me","sen"],wifi:S.wifi?["ok","bar"]:["bad","ýok"],disk:S.disk<100?["ok",S.disk+"%"]:["bad","100%"],web:S.web?["ok","işleýär"]:["bad","duran"],db:S.db?["ok","işleýär"]:["bad","duran"],site:siteOk()?["ok","açyk"]:["bad","ýok"]};
+ document.getElementById("map").innerHTML=N.map(function(n){
+  if(W.level<n[3])return '<div class="node lock"><i>🔒</i><em>Gulplanan</em><strong>dereje '+n[3]+'</strong></div>';
+  var s=st[n[0]];return '<div class="node '+s[0]+(n.fresh?' new':'')+'"><i>'+n[1]+'</i><em>'+n[2]+'</em><strong>'+s[1]+'</strong></div>'}).join("");
+ document.getElementById("sl").textContent=W.level;document.getElementById("sf").textContent=W.fixed;document.getElementById("sr").textContent=W.rot?"açyk":"ýok";
+}
+function p(t,c){var d=document.createElement("div");if(c)d.className=c;d.textContent=t;out.appendChild(d);out.scrollTop=out.scrollHeight}
+function say(t){why.textContent=t}
+function start(k){
+ S.inc=k;INC[k].set();document.getElementById("mt").textContent="Waka: "+INC[k].t;document.getElementById("md").textContent=INC[k].d;
+ document.getElementById("mis").style.display="";p("⚠ Täze waka: "+INC[k].t,"e");render();
+}
+function pick(){
+ var u=["db","wifi"].filter(function(k){return k==="db"?W.level>=2:W.level>=3});
+ if(!W.rot&&W.level>=1&&Math.random()<.4)u.push("disk");
+ if(!u.length)u=["db"];
+ if(W.level===1)return "disk";
+ return u[Math.floor(Math.random()*u.length)];
+}
+function guard(){ // rot prevented a disk incident
+ p("🛡 Awtomat gorag: log faýl arassalandy. Disk doldurylmady.","g");say("Awtomatlaşdyryş wakany öňünden saklady. Dünýä özbaşdak goraýar.");
+}
+function solve(){
+ S.fixed=1;W.fixed++;var up=W.level<3;if(up)W.level++;
+ var j=document.getElementById("win");
+ document.getElementById("wh").textContent=up?"Dünýä ulaldy":"Dünýä durnukly";
+ var h="<p>Sebäp zynjyry we netije ýatda galdy.</p>";
+ if(S.inc==="disk")h="<p>Uly log faýl → disk doly → nginx başlamady → sahypa ýok.</p>"+(W.rot?"":"<p>Täze buýruk açyldy: <b>logrotate on</b>. Ony ýazyp, dünýäni geljekdäki şol bir meseleden gora.</p>");
+ if(S.inc==="db")h="<p>Maglumat bazasy duran → sahypa açylýar, ýöne maglumat ýok. Sebäp ýeke-täk hyzmatda eken.</p>";
+ if(S.inc==="wifi")h="<p>Ulgam ýok → hiç hyzmat elýeterli däl. Ilki ýol barlanýar, soňra hyzmat.</p>";
+ if(up)h+="<p>Täze rayon açyldy: "+(W.level===2?"🗄️ Maglumat bazasy":"📶 Wi-Fi")+".</p>";
+ document.getElementById("wb").innerHTML=h;j.classList.add("on");
+ document.getElementById("mis").style.display="none";S.inc=null;save();
+ var f=N.filter(function(n){return n[3]===W.level})[0];if(up&&f)f.fresh=1;render();if(f)f.fresh=0;
+ j.scrollIntoView({behavior:"smooth",block:"nearest"});
+ clearTimeout(S.tm);S.tm=setTimeout(function(){document.getElementById("win").classList.remove("on");var k=pick();if(k==="disk"&&W.rot){guard();S.tm=setTimeout(function(){start("db"===pickAlt()?"db":pickAlt())},9000)}else start(k)},9000);
+}
+function pickAlt(){return W.level>=3&&Math.random()<.5?"wifi":(W.level>=2?"db":"disk")}
+function svcName(x){return x==="nginx"?"web":x==="postgres"?"db":x==="wifi"?"wifi":null}
+function run(raw){
+ var cmd=raw.trim().replace(/\s+/g," ");if(!cmd)return;p("$ "+cmd,"c");
+ var a=cmd.split(" ");
+ if(cmd==="help"){p("df -h · ls /var/log · rm /var/log/big.log · ping router\nsystemctl status|start|restart nginx|postgres|wifi\ncurl zippy.tm"+(S.fixed||W.fixed?" · logrotate on":""));say("Buýruklar dünýäni görkezýär we üýtgedýär.")}
+ else if(cmd==="df -h"){p("/dev/sda1  20G  "+(S.log?"20G":"10G")+"  "+S.disk+"%");say(S.disk>=100?"Disk doly. Programmalar hiç zat ýaza bilmeýär.":"Diskde ýer bar.")}
+ else if(cmd==="ls /var/log"||cmd==="ls"){p(S.log?"auth.log  syslog  big.log (9.8G)":"auth.log  syslog");say(S.log?"big.log şübheli. Diskiň ýarysyny eýeledi.":"Uly faýl ýok.")}
+ else if(cmd==="rm /var/log/big.log"||cmd==="rm big.log"){if(S.log){S.log=false;S.disk=48;p("big.log pozuldy.","g");say("Boş ýer döredi. Indi hyzmat başlap biler.")}else p("rm: faýl tapylmady","e")}
+ else if(cmd==="ping router"){p(S.wifi?"64 bytes: time=4ms":"Request timeout","");if(!S.wifi)p("","e");say(S.wifi?"Router jogap berýär. Ýol açyk.":"Router jogap bermeýär. Ýol kesildi.")}
+ else if(cmd==="logrotate on"){if(W.fixed<1&&!S.fixed)p("logrotate: heniz açylmady. Ilki bir meseläni çöz.","e");else{W.rot=true;save();p("logrotate açyk. Log faýllar awtomat arassalanýar.","g");say("Bu awtomatlaşdyryş. Dünýä indi öz-özüni goraýar.")}}
+ else if(a[0]==="systemctl"&&svcName(a[2])){var k=svcName(a[2]);
+  if(W.level<(k==="db"?2:k==="wifi"?3:1))p("Bu rayon heniz açylmady.","e");
+  else if(a[1]==="status"){p(S[k]?"● "+a[2]+" - active (running)":"● "+a[2]+" - inactive (dead)"+(k==="web"&&S.disk>=100?"\nsebäp: ýer ýok":""),S[k]?"g":"e");say(S[k]?a[2]+" işleýär.":a[2]+" duran.")}
+  else if(a[1]==="start"||a[1]==="restart"){if(k==="web"&&S.disk>=100){p("Failed: no space left on device","e");say("Başlap bilmedi. Ilki diskde ýer aç.")}else{S[k]=true;p(a[2]+" başlady.","g");say(a[2]+" turdy. Indi sahypany barla.")}}
+  else p("Ulanyş: systemctl status|start|restart "+a[2],"e")}
+ else if(cmd==="curl zippy.tm"){
+  if(!S.wifi){p("curl: (6) Network is unreachable","e");say("Ulgam ýok. Sebäbi hyzmatdan öň, ýoldan gözle.")}
+  else if(!S.web){p("curl: (7) Connection refused","e");say("Hyzmat diňlemeýär.")}
+  else if(!S.db){p("HTTP 500: database connection refused","e");say("Nginx bar, ýöne maglumat bazasyna ýetip bilenok.")}
+  else{p("HTTP 200 OK\nZIPPY WORLD hoş geldiňiz","g");say("Sahypa açyldy.");if(S.inc)solve()}}
+ else{p(a[0]+": tanalmady. 'help' ýaz.","e");say("Hiç zat bozulmady.")}
+ render();
+}
+var C=["curl zippy.tm","df -h","ls /var/log","rm /var/log/big.log","systemctl status nginx","systemctl start nginx","systemctl start postgres","systemctl restart wifi","ping router","logrotate on"];
+document.getElementById("chips").innerHTML=C.map(function(c){return '<button class="chip" data-c="'+c+'">'+c+'</button>'}).join("");
+document.getElementById("chips").onclick=function(e){var c=e.target.dataset&&e.target.dataset.c;if(c)run(c)};
+document.getElementById("run").onclick=function(){run(inp.value);inp.value=""};
+inp.onkeydown=function(e){if(e.key==="Enter"){run(inp.value);inp.value=""}};
+var H=0;document.getElementById("hint").onclick=function(){var m={disk:["curl zippy.tm","df -h","ls /var/log","rm /var/log/big.log, soňra systemctl start nginx"],db:["curl zippy.tm","systemctl status postgres","systemctl start postgres"],wifi:["curl zippy.tm","ping router","systemctl restart wifi"]}[S.inc]||["Waka garaşylýar. Dünýä özi täze waka döredýär."];say("Maslahat: "+m[H%m.length]);H++};
+document.getElementById("rs").onclick=function(){try{localStorage.removeItem(KEY)}catch(e){}location.reload()};
+p("Dünýä işe başlady.","g");render();start(pick());
+</script>
+</body>
+</html>
